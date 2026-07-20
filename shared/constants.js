@@ -43,4 +43,4 @@ export const MSG_AMPLIFY_TEXT = 'AMPLIFY_TEXT';
 
 export const MSG_LIST_MODELS = 'LIST_MODELS';
 
-export const PROVIDERS = ['anthropic', 'openai', 'google', 'openrouter', 'ollama'];
+export const PROVIDERS = ['anthropic', 'openai', 'google', 'openrouter', 'ollama', 'lmstudio'];

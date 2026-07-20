@@ -6,9 +6,16 @@ const MODEL_HINTS = {
   google: 'Free-text model id, e.g. gemini-3-pro',
   openrouter: 'Needs a vendor prefix, e.g. anthropic/claude-opus-4-8',
   ollama: 'Model name as shown by `ollama list`, e.g. llama3.1:8b',
+  lmstudio: 'Model id as shown in LM Studio’s "My Models" / Local Server tab',
 };
 
-const KEY_OPTIONAL_PROVIDERS = new Set(['ollama']);
+// Local, unauthenticated servers: no API key required, and they get a Base URL field.
+const KEY_OPTIONAL_PROVIDERS = new Set(['ollama', 'lmstudio']);
+const LOCAL_PROVIDERS = new Set(['ollama', 'lmstudio']);
+const DEFAULT_BASE_URLS = {
+  ollama: 'http://localhost:11434',
+  lmstudio: 'http://localhost:1234',
+};
 
 const form = document.getElementById('config-form');
 const providerEl = document.getElementById('provider');
@@ -28,11 +35,12 @@ let fetchDebounce;
 
 function updateFieldVisibility() {
   const provider = providerEl.value;
-  const isOllama = provider === 'ollama';
-  baseUrlRowEl.classList.toggle('hidden', !isOllama);
-  // Ollama itself needs no key, but the field stays visible (just not required) since
-  // some local setups put Ollama behind a reverse-proxy that expects a bearer token here.
-  apiKeyLabelEl.textContent = isOllama ? 'API key (optional)' : 'API key';
+  const isLocal = LOCAL_PROVIDERS.has(provider);
+  baseUrlRowEl.classList.toggle('hidden', !isLocal);
+  if (isLocal) baseUrlEl.placeholder = DEFAULT_BASE_URLS[provider] || '';
+  // Local providers need no key, but the field stays visible (just not required) since
+  // some local setups put them behind a reverse-proxy that expects a bearer token here.
+  apiKeyLabelEl.textContent = isLocal ? 'API key (optional)' : 'API key';
   modelHintEl.textContent = MODEL_HINTS[provider] || '';
 }
 

@@ -4,16 +4,18 @@ Select text in any editable field on any web page — a chat box, a form, anythi
 click the ✨ **Enhance** button that appears, and the selection is rewritten in place
 into a sharper prompt. Runs entirely as a browser extension; no local server required.
 You bring your own API key for whichever provider you want to use (or point it at a
-local Ollama install for a fully offline setup).
+local Ollama or LM Studio install for a fully offline setup).
 
-Supported providers: **Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter, Ollama**.
+Supported providers: **Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter, Ollama,
+LM Studio**.
 
 ## Requirements
 
 - A Chromium-based browser: Google Chrome, Microsoft Edge, or Brave all work the same
   way. (Firefox is not supported — this extension uses Manifest V3 APIs.)
 - An API key for whichever cloud provider you choose, **or** a local
-  [Ollama](https://ollama.com) install if you'd rather run models on your own machine.
+  [Ollama](https://ollama.com) or [LM Studio](https://lmstudio.ai) install if you'd
+  rather run models on your own machine.
 
 ## Load the extension
 
@@ -51,7 +53,7 @@ There is no build step — the folder is loaded as-is.
 3. Enter a **Model** — this is a free-text field backed by a dropdown of suggestions;
    click **Refresh models** (or just enter your API key) to populate it from the
    provider's live model list, or type a model id yourself if you already know it.
-4. Enter your **API key** (not needed for Ollama — see below).
+4. Enter your **API key** (not needed for Ollama or LM Studio — see below).
 5. Click **Save**.
 
 Keys are stored locally in the browser's extension storage — they are never sent
@@ -72,6 +74,22 @@ Ollama runs models locally, so there's no key and nothing leaves your machine.
    **Base URL** of `http://localhost:11434` works for a standard local install — only
    change it if you've configured Ollama to listen elsewhere.
 5. Click **Refresh models** to list what you've pulled, pick one, Save.
+
+### Using LM Studio instead of a cloud API
+
+LM Studio also runs models locally with no key required — its built-in server just
+speaks the same API shape as OpenAI, so it plugs in the same way Ollama does.
+
+1. Install LM Studio from [lmstudio.ai](https://lmstudio.ai) (Windows, macOS, and
+   Linux builds are all available from the same download page).
+2. Download a model inside LM Studio (the "Discover" / search tab).
+3. Start the local server: in LM Studio, go to the **Local Server** (or "Developer")
+   tab, load the model you downloaded, and click **Start Server**. It listens on
+   `http://localhost:1234` by default.
+4. In PromptEnhance's Options, set Provider to **LM Studio (local)**. The default
+   **Base URL** of `http://localhost:1234` matches LM Studio's default — only change
+   it if you've configured LM Studio to listen elsewhere.
+5. Click **Refresh models** to list what's loaded, pick one, Save.
 
 ## Using it
 
@@ -95,7 +113,8 @@ you edited `content/content-script.js`, also refresh any tab you're testing in.
 - **"No model configured" error:** open Options and make sure Provider, Model, and
   (if required) API key are all filled in and saved.
 - **Model dropdown says "Failed to load models":** double check the API key, or for
-  Ollama, that the server is actually running and reachable at the Base URL shown.
+  Ollama/LM Studio, that the local server is actually running (and its server tab
+  started, for LM Studio) and reachable at the Base URL shown.
 - **Something else looks broken:** on the extensions page, click the "service worker"
   link on the PromptEnhance card to open its console, and check the page's own
   DevTools console (F12) for content-script errors.

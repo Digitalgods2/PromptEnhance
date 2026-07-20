@@ -5,10 +5,11 @@ import * as openai from './providers/openai.js';
 import * as google from './providers/google.js';
 import * as openrouter from './providers/openrouter.js';
 import * as ollama from './providers/ollama.js';
+import * as lmstudio from './providers/lmstudio.js';
 
-const ADAPTERS = { anthropic, openai, google, openrouter, ollama };
-// Ollama is a local, unauthenticated server — every other provider needs a key.
-const KEY_OPTIONAL_PROVIDERS = new Set(['ollama']);
+const ADAPTERS = { anthropic, openai, google, openrouter, ollama, lmstudio };
+// Ollama and LM Studio are local, unauthenticated servers — every other provider needs a key.
+const KEY_OPTIONAL_PROVIDERS = new Set(['ollama', 'lmstudio']);
 const KEEPALIVE_ALARM = 'promptenhance-keepalive';
 
 chrome.action.onClicked.addListener(() => {
