@@ -102,4 +102,4 @@ you edited `content/content-script.js`, also refresh any tab you're testing in.
 
 ---
 
-Copyright © 2026 DigitalGuides.ai. All rights reserved.
+Copyright © 2026 digitalgods.ai. All rights reserved.
