@@ -102,6 +102,9 @@ models/templates that support it), and as a guaranteed fallback strips any `<thi
 page — so you shouldn't see this leak regardless of the model. Cloud providers aren't
 affected: their reasoning is returned in a separate field the adapters already skip.
 
+Confirmed working against a reasoning model in LM Studio; the same fallback applies to
+Ollama but hasn't been separately verified there yet.
+
 ## Using it
 
 1. Select text inside any textarea, input, or chat box (contenteditable) on any page.
