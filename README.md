@@ -9,6 +9,8 @@ local Ollama or LM Studio install for a fully offline setup).
 Supported providers: **Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter, Ollama,
 LM Studio**.
 
+📺 **[Watch a demo video](https://youtu.be/BFCDv93I3a4)**
+
 ## Requirements
 
 - A Chromium-based browser: Google Chrome, Microsoft Edge, or Brave all work the same
