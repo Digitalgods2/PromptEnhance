@@ -19,7 +19,7 @@ export async function call({ model, baseUrl }, userText, systemPrompt) {
         { role: 'user', content: userText },
       ],
     }),
-  }, 60000); // local models can be slow to load/cold-start
+  }, 300000); // local inference has no SLA — allow up to 5 minutes for cold-start/slow hardware
 
   if (!response.ok) throw await errorForResponse(response);
 
