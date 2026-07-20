@@ -106,6 +106,28 @@ There's no build/watch process. After changing any file, go back to the extensio
 page and click the reload icon on the PromptEnhance card to pick up the changes. If
 you edited `content/content-script.js`, also refresh any tab you're testing in.
 
+## Timeouts
+
+Each request the extension makes gives up after a fixed time and shows an error rather
+than hanging forever. These are hardcoded per provider (in `background/providers/`),
+not configurable from the UI:
+
+| Provider | Enhance request | Model list |
+| --- | --- | --- |
+| Anthropic, OpenAI, Google, OpenRouter | 30 seconds | 15 seconds |
+| Ollama, LM Studio | 5 minutes | 15 seconds |
+
+Cloud providers get a short timeout because a healthy API should respond in a couple
+seconds. Ollama and LM Studio get 5 minutes instead, since local inference has no
+comparable SLA — a cold model load (reading multi-GB weights into memory) or
+CPU-only generation can legitimately take minutes, especially for larger models. The
+model-list fetch stays short everywhere, since that's just metadata the server should
+already have on hand.
+
+If you're regularly hitting the 5-minute local ceiling, that generally means the model
+itself is too large/slow for your hardware for interactive use — try a smaller or
+more quantized model rather than waiting it out.
+
 ## Troubleshooting
 
 - **No button appears on selection:** make sure you're selecting inside an actual
@@ -115,6 +137,8 @@ you edited `content/content-script.js`, also refresh any tab you're testing in.
 - **Model dropdown says "Failed to load models":** double check the API key, or for
   Ollama/LM Studio, that the local server is actually running (and its server tab
   started, for LM Studio) and reachable at the Base URL shown.
+- **"Request timed out" error:** see [Timeouts](#timeouts) above for how long each
+  provider is given before this fires.
 - **Something else looks broken:** on the extensions page, click the "service worker"
   link on the PromptEnhance card to open its console, and check the page's own
   DevTools console (F12) for content-script errors.
