@@ -91,6 +91,17 @@ speaks the same API shape as OpenAI, so it plugs in the same way Ollama does.
    it if you've configured LM Studio to listen elsewhere.
 5. Click **Refresh models** to list what's loaded, pick one, Save.
 
+### Reasoning models and "thinking" tokens
+
+Reasoning-capable models (DeepSeek-R1, Qwen3, QwQ, etc.) run locally through Ollama or
+LM Studio sometimes leak their internal chain-of-thought straight into the response,
+wrapped in a `<think>...</think>` block, ahead of the actual answer. PromptEnhance
+asks the server not to think in the first place (best-effort, and only honored by
+models/templates that support it), and as a guaranteed fallback strips any `<think>`,
+`<thinking>`, or `<reasoning>` block from the response before it's inserted into your
+page — so you shouldn't see this leak regardless of the model. Cloud providers aren't
+affected: their reasoning is returned in a separate field the adapters already skip.
+
 ## Using it
 
 1. Select text inside any textarea, input, or chat box (contenteditable) on any page.

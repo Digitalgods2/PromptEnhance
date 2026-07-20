@@ -21,6 +21,10 @@ export async function call({ model, baseUrl }, userText, systemPrompt) {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userText },
       ],
+      // Best-effort: LM Studio forwards this into the Jinja chat template for models
+      // (e.g. Qwen3) whose template checks it. Ignored harmlessly otherwise —
+      // shared/strip-thinking.js is the guaranteed fallback.
+      chat_template_kwargs: { enable_thinking: false },
     }),
   }, 300000); // local inference has no SLA — allow up to 5 minutes for cold-start/slow hardware
 

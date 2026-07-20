@@ -1,5 +1,6 @@
 import { AMPLIFY_PROMPT, STORAGE_KEY, MSG_AMPLIFY_TEXT, MSG_LIST_MODELS } from '../shared/constants.js';
 import { stripCodeFence } from '../shared/strip-fence.js';
+import { stripThinking } from '../shared/strip-thinking.js';
 import * as anthropic from './providers/anthropic.js';
 import * as openai from './providers/openai.js';
 import * as google from './providers/google.js';
@@ -73,7 +74,9 @@ async function handleAmplify(text) {
         raw,
         AMPLIFY_PROMPT
       );
-      const enhanced = stripCodeFence(rawResult);
+      // Strip any leaked <think> block before stripping a code fence, since a
+      // reasoning block (if present) comes before the fenced answer, not inside it.
+      const enhanced = stripCodeFence(stripThinking(rawResult));
       if (!enhanced) {
         return { ok: false, error: 'Model returned nothing.' };
       }

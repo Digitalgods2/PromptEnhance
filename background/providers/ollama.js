@@ -14,6 +14,10 @@ export async function call({ model, baseUrl }, userText, systemPrompt) {
     body: JSON.stringify({
       model,
       stream: false,
+      // Best-effort: Ollama's native reasoning-model support honors this and skips
+      // thinking entirely. Ignored harmlessly by models/templates that don't support
+      // it — shared/strip-thinking.js is the guaranteed fallback for those.
+      think: false,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userText },
