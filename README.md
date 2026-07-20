@@ -1,0 +1,105 @@
+# PromptEnhance
+
+Select text in any editable field on any web page — a chat box, a form, anything —
+click the ✨ **Enhance** button that appears, and the selection is rewritten in place
+into a sharper prompt. Runs entirely as a browser extension; no local server required.
+You bring your own API key for whichever provider you want to use (or point it at a
+local Ollama install for a fully offline setup).
+
+Supported providers: **Anthropic (Claude), OpenAI, Google (Gemini), OpenRouter, Ollama**.
+
+## Requirements
+
+- A Chromium-based browser: Google Chrome, Microsoft Edge, or Brave all work the same
+  way. (Firefox is not supported — this extension uses Manifest V3 APIs.)
+- An API key for whichever cloud provider you choose, **or** a local
+  [Ollama](https://ollama.com) install if you'd rather run models on your own machine.
+
+## Load the extension
+
+These steps are the same on every platform — only *where* the browser's menu lives
+differs slightly.
+
+1. Open your browser and go to the extensions page:
+   - **Chrome:** `chrome://extensions`
+   - **Edge:** `edge://extensions`
+   - **Brave:** `brave://extensions`
+2. Turn on **Developer mode** (a toggle, usually top-right of the page).
+3. Click **Load unpacked**.
+4. In the file picker, select this project's folder (the one containing
+   `manifest.json` — e.g. `PromptEnhance/`, wherever you placed it on disk).
+5. PromptEnhance should now show up in your extensions list and in the toolbar
+   (pin it via the puzzle-piece icon if you don't see it).
+
+### Platform notes for step 4 (file picker)
+
+- **Windows (default):** browse to wherever you saved the folder, e.g.
+  `C:\Users\<you>\Desktop\PromptEnhance`.
+- **macOS:** same dialog, just a macOS-style file picker — e.g.
+  `/Users/<you>/Desktop/PromptEnhance` or wherever you cloned/unzipped it.
+- **Linux:** same idea — e.g. `/home/<you>/PromptEnhance`. If Chrome was installed via
+  Flatpak or Snap, its file picker may only show folders under your home directory by
+  default; keep the project there, or grant the sandboxed browser access to wherever
+  you placed it.
+
+There is no build step — the folder is loaded as-is.
+
+## Configure a provider
+
+1. Click the PromptEnhance toolbar icon (or right-click it → **Options**).
+2. Pick a **Provider**.
+3. Enter a **Model** — this is a free-text field backed by a dropdown of suggestions;
+   click **Refresh models** (or just enter your API key) to populate it from the
+   provider's live model list, or type a model id yourself if you already know it.
+4. Enter your **API key** (not needed for Ollama — see below).
+5. Click **Save**.
+
+Keys are stored locally in the browser's extension storage — they are never sent
+anywhere except directly to the provider's own API.
+
+### Using Ollama instead of a cloud API
+
+Ollama runs models locally, so there's no key and nothing leaves your machine.
+
+1. Install Ollama:
+   - **Windows / macOS:** download the installer from [ollama.com/download](https://ollama.com/download).
+   - **Linux:** `curl -fsSL https://ollama.com/install.sh | sh`
+2. Pull a model, e.g. `ollama pull llama3.1:8b`.
+3. Make sure the Ollama server is running (the installer starts it automatically on
+   Windows/macOS; on Linux it typically runs as a systemd service — `systemctl status
+   ollama` to check, or run `ollama serve` manually).
+4. In PromptEnhance's Options, set Provider to **Ollama (local)**. The default
+   **Base URL** of `http://localhost:11434` works for a standard local install — only
+   change it if you've configured Ollama to listen elsewhere.
+5. Click **Refresh models** to list what you've pulled, pick one, Save.
+
+## Using it
+
+1. Select text inside any textarea, input, or chat box (contenteditable) on any page.
+2. A small ✨ **Enhance** button appears near your selection.
+3. Click it. The button shows a loading spinner, then the selected text is replaced
+   in place with the enhanced version.
+4. If you don't like the result, **Ctrl+Z** (Cmd+Z on macOS) undoes it back to your
+   original text, the same as any other edit in that field.
+
+## After editing the code
+
+There's no build/watch process. After changing any file, go back to the extensions
+page and click the reload icon on the PromptEnhance card to pick up the changes. If
+you edited `content/content-script.js`, also refresh any tab you're testing in.
+
+## Troubleshooting
+
+- **No button appears on selection:** make sure you're selecting inside an actual
+  input/textarea/contenteditable element, not plain page text.
+- **"No model configured" error:** open Options and make sure Provider, Model, and
+  (if required) API key are all filled in and saved.
+- **Model dropdown says "Failed to load models":** double check the API key, or for
+  Ollama, that the server is actually running and reachable at the Base URL shown.
+- **Something else looks broken:** on the extensions page, click the "service worker"
+  link on the PromptEnhance card to open its console, and check the page's own
+  DevTools console (F12) for content-script errors.
+
+---
+
+Copyright © 2026 DigitalGuides.ai. All rights reserved.

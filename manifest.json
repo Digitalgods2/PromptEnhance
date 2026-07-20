@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "PromptEnhance",
+  "version": "0.1.0",
+  "description": "Select text in any editable field, click Enhance, and get a stronger prompt back — powered by your own AI API key.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content-script.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "options_page": "options/options.html",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": [
+    "https://api.anthropic.com/*",
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://openrouter.ai/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "action": {}
+}

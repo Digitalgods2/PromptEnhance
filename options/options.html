@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>PromptEnhance settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <main>
+    <h1>PromptEnhance</h1>
+    <p class="hint">Select text on any page, click the ✨ Enhance button that appears, and it's rewritten in place using the settings below.</p>
+
+    <form id="config-form">
+      <label>
+        Provider
+        <select id="provider">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI</option>
+          <option value="google">Google (Gemini)</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="ollama">Ollama (local)</option>
+        </select>
+      </label>
+
+      <label id="baseUrl-row" class="hidden">
+        Base URL
+        <input id="baseUrl" type="text" placeholder="http://localhost:11434" autocomplete="off" />
+      </label>
+
+      <label id="apiKey-row">
+        <span id="apiKey-label">API key</span>
+        <div class="key-row">
+          <input id="apiKey" type="password" autocomplete="off" />
+          <button type="button" id="toggle-key">Show</button>
+        </div>
+      </label>
+
+      <label>
+        Model
+        <div class="model-row">
+          <input id="model" list="model-options" type="text" placeholder="e.g. claude-opus-4-8" autocomplete="off" />
+          <button type="button" id="refresh-models">Refresh models</button>
+        </div>
+        <datalist id="model-options"></datalist>
+      </label>
+      <p class="hint" id="model-hint"></p>
+      <p class="hint" id="models-status"></p>
+
+      <button type="submit" id="save">Save</button>
+      <span id="status" class="status" role="status"></span>
+    </form>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
