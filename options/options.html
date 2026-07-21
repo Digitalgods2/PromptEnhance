@@ -39,10 +39,10 @@
       <label>
         Model
         <div class="model-row">
-          <input id="model" list="model-options" type="text" placeholder="e.g. claude-opus-4-8" autocomplete="off" />
+          <select id="model-select"></select>
           <button type="button" id="refresh-models">Refresh models</button>
         </div>
-        <datalist id="model-options"></datalist>
+        <input id="model-custom" type="text" placeholder="Type a model id" autocomplete="off" />
       </label>
       <p class="hint" id="model-hint"></p>
       <p class="hint" id="models-status"></p>

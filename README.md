@@ -52,9 +52,10 @@ There is no build step — the folder is loaded as-is.
 
 1. Click the PromptEnhance toolbar icon (or right-click it → **Options**).
 2. Pick a **Provider**.
-3. Enter a **Model** — this is a free-text field backed by a dropdown of suggestions;
-   click **Refresh models** (or just enter your API key) to populate it from the
-   provider's live model list, or type a model id yourself if you already know it.
+3. Pick a **Model** from the dropdown — click **Refresh models** (or just enter your
+   API key) to populate it from the provider's live model list. If you need a model
+   that isn't listed yet, choose **Custom (type manually)…** at the bottom of the
+   dropdown to type an id yourself.
 4. Enter your **API key** (not needed for Ollama or LM Studio — see below).
 5. Click **Save**.
 

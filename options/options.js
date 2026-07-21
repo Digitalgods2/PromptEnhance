@@ -1,12 +1,12 @@
 import { STORAGE_KEY, MSG_LIST_MODELS } from '../shared/constants.js';
 
 const MODEL_HINTS = {
-  anthropic: 'Free-text model id, e.g. claude-opus-4-8',
-  openai: 'Free-text model id, e.g. gpt-5.1',
-  google: 'Free-text model id, e.g. gemini-3-pro',
-  openrouter: 'Needs a vendor prefix, e.g. anthropic/claude-opus-4-8',
-  ollama: 'Model name as shown by `ollama list`, e.g. llama3.1:8b',
-  lmstudio: 'Model id as shown in LM Studio’s "My Models" / Local Server tab',
+  anthropic: 'Pick a model below, or switch to Custom to type an id yourself.',
+  openai: 'Pick a model below, or switch to Custom to type an id yourself.',
+  google: 'Pick a model below, or switch to Custom to type an id yourself.',
+  openrouter: 'Needs a vendor prefix if typed manually, e.g. anthropic/claude-opus-4-8.',
+  ollama: 'Model name as shown by `ollama list`, e.g. llama3.1:8b.',
+  lmstudio: 'Model id as shown in LM Studio’s "My Models" / Local Server tab.',
 };
 
 // Local, unauthenticated servers: no API key required, and they get a Base URL field
@@ -18,6 +18,8 @@ const DEFAULT_BASE_URLS = {
   lmstudio: 'http://localhost:1234',
 };
 
+const CUSTOM_VALUE = '__custom__';
+
 const form = document.getElementById('config-form');
 const providerEl = document.getElementById('provider');
 const baseUrlRowEl = document.getElementById('baseUrl-row');
@@ -25,8 +27,8 @@ const baseUrlEl = document.getElementById('baseUrl');
 const apiKeyLabelEl = document.getElementById('apiKey-label');
 const apiKeyEl = document.getElementById('apiKey');
 const toggleKeyEl = document.getElementById('toggle-key');
-const modelEl = document.getElementById('model');
-const modelOptionsEl = document.getElementById('model-options');
+const modelSelectEl = document.getElementById('model-select');
+const modelCustomEl = document.getElementById('model-custom');
 const modelHintEl = document.getElementById('model-hint');
 const modelsStatusEl = document.getElementById('models-status');
 const refreshModelsEl = document.getElementById('refresh-models');
@@ -37,6 +39,7 @@ let fetchDebounce;
 // dropdown shows that provider's own saved settings instead of whatever was last typed
 // in for a different provider.
 let byProvider = {};
+let lastFetchedModels = [];
 
 function updateFieldVisibility() {
   const provider = providerEl.value;
@@ -46,14 +49,68 @@ function updateFieldVisibility() {
   modelHintEl.textContent = MODEL_HINTS[provider] || '';
 }
 
+function currentModelValue() {
+  return modelSelectEl.value === CUSTOM_VALUE ? modelCustomEl.value.trim() : modelSelectEl.value;
+}
+
+function appendCustomOption() {
+  const customOpt = document.createElement('option');
+  customOpt.value = CUSTOM_VALUE;
+  customOpt.textContent = 'Custom (type manually)…';
+  modelSelectEl.appendChild(customOpt);
+}
+
+// Rebuilds the <select> from a fetched model list (always includes a trailing "Custom"
+// entry), then re-applies whichever model value was previously in effect: selected in
+// the dropdown if it's on the new list, otherwise shown in the custom text field so
+// nothing typed/saved is silently lost just because a refresh didn't include it.
+function populateModelSelect(models) {
+  lastFetchedModels = models;
+  const value = currentModelValue();
+
+  modelSelectEl.innerHTML = '';
+  for (const m of models) {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.label && m.label !== m.id ? `${m.id} — ${m.label}` : m.id;
+    modelSelectEl.appendChild(opt);
+  }
+  appendCustomOption();
+
+  applyModelValue(value);
+}
+
+function applyModelValue(value) {
+  const isKnown = value && lastFetchedModels.some((m) => m.id === value);
+  if (isKnown) {
+    modelSelectEl.value = value;
+    modelCustomEl.classList.add('hidden');
+  } else {
+    modelSelectEl.value = CUSTOM_VALUE;
+    modelCustomEl.classList.remove('hidden');
+    modelCustomEl.value = value || '';
+  }
+}
+
+modelSelectEl.addEventListener('change', () => {
+  modelCustomEl.classList.toggle('hidden', modelSelectEl.value !== CUSTOM_VALUE);
+  if (modelSelectEl.value === CUSTOM_VALUE) modelCustomEl.focus();
+});
+
 // Populates the form from this provider's own saved settings (blank if never
 // configured), pre-filling a real default Base URL for local providers rather than
-// leaving it empty — so the field visibly shows what will actually be used.
+// leaving it empty — so the field visibly shows what will actually be used. The model
+// starts as "Custom" showing the saved value; fetchModels() (triggered right after, if
+// credentials are present) replaces it with the real list and selects it properly if
+// it's on there.
 function loadProviderFields(provider) {
   const saved = byProvider[provider] || {};
-  modelEl.value = saved.model || '';
   apiKeyEl.value = saved.apiKey || '';
   baseUrlEl.value = saved.baseUrl || (LOCAL_PROVIDERS.has(provider) ? DEFAULT_BASE_URLS[provider] : '') || '';
+  lastFetchedModels = [];
+  modelSelectEl.innerHTML = '';
+  appendCustomOption();
+  applyModelValue(saved.model || '');
   updateFieldVisibility();
 }
 
@@ -61,16 +118,6 @@ function hasCredentials() {
   const provider = providerEl.value;
   if (KEY_OPTIONAL_PROVIDERS.has(provider)) return true;
   return apiKeyEl.value.trim().length > 0;
-}
-
-function populateModelOptions(models) {
-  modelOptionsEl.innerHTML = '';
-  for (const m of models) {
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.label = m.label && m.label !== m.id ? m.label : '';
-    modelOptionsEl.appendChild(opt);
-  }
 }
 
 async function fetchModels({ silent } = {}) {
@@ -93,13 +140,12 @@ async function fetchModels({ silent } = {}) {
   });
 
   if (!response || !response.ok) {
-    populateModelOptions([]);
     modelsStatusEl.textContent = response?.error || 'Failed to load models.';
     modelsStatusEl.classList.add('error');
     return;
   }
 
-  populateModelOptions(response.models);
+  populateModelSelect(response.models);
   modelsStatusEl.classList.remove('error');
   modelsStatusEl.textContent = `${response.models.length} model${response.models.length === 1 ? '' : 's'} available.`;
 }
@@ -120,7 +166,6 @@ async function load() {
 
 providerEl.addEventListener('change', () => {
   loadProviderFields(providerEl.value);
-  populateModelOptions([]);
   modelsStatusEl.textContent = '';
   if (hasCredentials()) fetchModels({ silent: true });
 });
@@ -138,7 +183,7 @@ toggleKeyEl.addEventListener('click', () => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const provider = providerEl.value;
-  const model = modelEl.value.trim();
+  const model = currentModelValue();
   const apiKey = apiKeyEl.value.trim();
   const baseUrl = baseUrlEl.value.trim();
   const keyRequired = !KEY_OPTIONAL_PROVIDERS.has(provider);

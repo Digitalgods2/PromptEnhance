@@ -49,7 +49,7 @@ input, select {
   gap: 8px;
 }
 
-.key-row input, .model-row input {
+.key-row input, .model-row input, .model-row select {
   flex: 1;
 }
 
