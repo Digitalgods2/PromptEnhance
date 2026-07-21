@@ -82,6 +82,31 @@ Ollama runs models locally, so there's no key and nothing leaves your machine.
    change it if you've configured Ollama to listen elsewhere.
 5. Click **Refresh models** to list what you've pulled, pick one, Save.
 
+#### If Ollama rejects the extension's requests (403 / "Invalid API key")
+
+Ollama's server checks the incoming request's `Origin` header against an allowlist and
+returns `403 Forbidden` for anything not on it — a browser extension's
+`chrome-extension://<id>` origin isn't there by default. This has nothing to do with
+an API key (Ollama doesn't use one locally); you need to tell Ollama to accept
+requests from the extension via the `OLLAMA_ORIGINS` environment variable, then
+restart it:
+
+- **Windows:** open a terminal and run `setx OLLAMA_ORIGINS "*"`, then close and
+  reopen Ollama (or restart the Ollama service/tray app) so it picks up the change.
+  (You can also set this permanently via System Properties → Environment Variables.)
+- **macOS:** if Ollama is running as the menu-bar app, run
+  `launchctl setenv OLLAMA_ORIGINS "*"` in Terminal, then quit and reopen Ollama. If
+  you run it via `ollama serve` in a terminal instead, `export OLLAMA_ORIGINS="*"` in
+  that shell before starting it.
+- **Linux (systemd service):** `sudo systemctl edit ollama.service`, add
+  `Environment="OLLAMA_ORIGINS=*"` under `[Service]`, then
+  `sudo systemctl daemon-reload && sudo systemctl restart ollama`. Running manually
+  instead? `export OLLAMA_ORIGINS="*"` before `ollama serve`.
+
+`*` allows any origin (simplest for a local personal setup); if you'd rather scope it
+to just this extension, use `chrome-extension://<your-extension-id>` instead — find
+the id on `chrome://extensions` under the PromptEnhance card.
+
 ### Using LM Studio instead of a cloud API
 
 LM Studio also runs models locally with no key required — its built-in server just
@@ -160,6 +185,10 @@ more quantized model rather than waiting it out.
   started, for LM Studio) and reachable at the Base URL shown.
 - **"Request timed out" error:** see [Timeouts](#timeouts) above for how long each
   provider is given before this fires.
+- **"Invalid API key" error on Ollama, even with no key set:** this is actually
+  Ollama's origin allowlist rejecting the extension (HTTP 403), not a real key
+  problem — see [If Ollama rejects the extension's requests](#if-ollama-rejects-the-extensions-requests-403--invalid-api-key)
+  above.
 - **Something else looks broken:** on the extensions page, click the "service worker"
   link on the PromptEnhance card to open its console, and check the page's own
   DevTools console (F12) for content-script errors.

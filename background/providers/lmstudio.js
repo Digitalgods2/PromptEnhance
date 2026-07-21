@@ -7,13 +7,14 @@ function baseUrlOf(baseUrl) {
 }
 
 // LM Studio's local server is OpenAI-compatible (same /v1/chat/completions and
-// /v1/models shapes) and doesn't validate the API key, so any placeholder works.
-export async function call({ model, baseUrl }, userText, systemPrompt) {
+// /v1/models shapes) and doesn't validate the API key by default, so a placeholder is
+// used unless the user entered a real one (e.g. for a reverse-proxied setup).
+export async function call({ model, baseUrl, apiKey }, userText, systemPrompt) {
   const response = await fetchWithTimeout(`${baseUrlOf(baseUrl)}/v1/chat/completions`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      authorization: 'Bearer lm-studio',
+      authorization: `Bearer ${apiKey || 'lm-studio'}`,
     },
     body: JSON.stringify({
       model,
@@ -36,9 +37,9 @@ export async function call({ model, baseUrl }, userText, systemPrompt) {
   return text;
 }
 
-export async function listModels({ baseUrl }) {
+export async function listModels({ baseUrl, apiKey }) {
   const response = await fetchWithTimeout(`${baseUrlOf(baseUrl)}/v1/models`, {
-    headers: { authorization: 'Bearer lm-studio' },
+    headers: { authorization: `Bearer ${apiKey || 'lm-studio'}` },
   }, 15000);
 
   if (!response.ok) throw await errorForResponse(response);
