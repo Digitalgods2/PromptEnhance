@@ -52,15 +52,17 @@ async function handleAmplify(text) {
   }
 
   const stored = await chrome.storage.local.get(STORAGE_KEY);
-  const config = stored[STORAGE_KEY];
-  const keyRequired = !config || !KEY_OPTIONAL_PROVIDERS.has(config.provider);
-  if (!config || !config.provider || !config.model?.trim() || (keyRequired && !config.apiKey?.trim())) {
+  const root = stored[STORAGE_KEY];
+  const provider = root?.provider;
+  const config = root?.byProvider?.[provider];
+  const keyRequired = !provider || !KEY_OPTIONAL_PROVIDERS.has(provider);
+  if (!provider || !config || !config.model?.trim() || (keyRequired && !config.apiKey?.trim())) {
     return { ok: false, error: 'No model configured — open the extension Options.' };
   }
 
-  const adapter = ADAPTERS[config.provider];
+  const adapter = ADAPTERS[provider];
   if (!adapter) {
-    return { ok: false, error: `Unknown provider "${config.provider}".` };
+    return { ok: false, error: `Unknown provider "${provider}".` };
   }
 
   return withKeepalive(async () => {

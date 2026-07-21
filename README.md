@@ -58,6 +58,11 @@ There is no build step — the folder is loaded as-is.
 4. Enter your **API key** (not needed for Ollama or LM Studio — see below).
 5. Click **Save**.
 
+Each provider remembers its own Model/API key/Base URL independently — switching the
+Provider dropdown loads that provider's own saved settings (pre-filling a sensible
+default Base URL the first time you pick a local provider) rather than showing
+whatever was last typed in for a different provider.
+
 Keys are stored locally in the browser's extension storage — they are never sent
 anywhere except directly to the provider's own API.
 

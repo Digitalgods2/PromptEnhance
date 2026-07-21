@@ -9,7 +9,8 @@ const MODEL_HINTS = {
   lmstudio: 'Model id as shown in LM Studio’s "My Models" / Local Server tab',
 };
 
-// Local, unauthenticated servers: no API key required, and they get a Base URL field.
+// Local, unauthenticated servers: no API key required, and they get a Base URL field
+// pre-filled with a real default value the first time each is selected.
 const KEY_OPTIONAL_PROVIDERS = new Set(['ollama', 'lmstudio']);
 const LOCAL_PROVIDERS = new Set(['ollama', 'lmstudio']);
 const DEFAULT_BASE_URLS = {
@@ -32,16 +33,28 @@ const refreshModelsEl = document.getElementById('refresh-models');
 const statusEl = document.getElementById('status');
 
 let fetchDebounce;
+// Each provider's own {model, apiKey, baseUrl} — keyed by provider, so switching the
+// dropdown shows that provider's own saved settings instead of whatever was last typed
+// in for a different provider.
+let byProvider = {};
 
 function updateFieldVisibility() {
   const provider = providerEl.value;
   const isLocal = LOCAL_PROVIDERS.has(provider);
   baseUrlRowEl.classList.toggle('hidden', !isLocal);
-  if (isLocal) baseUrlEl.placeholder = DEFAULT_BASE_URLS[provider] || '';
-  // Local providers need no key, but the field stays visible (just not required) since
-  // some local setups put them behind a reverse-proxy that expects a bearer token here.
   apiKeyLabelEl.textContent = isLocal ? 'API key (optional)' : 'API key';
   modelHintEl.textContent = MODEL_HINTS[provider] || '';
+}
+
+// Populates the form from this provider's own saved settings (blank if never
+// configured), pre-filling a real default Base URL for local providers rather than
+// leaving it empty — so the field visibly shows what will actually be used.
+function loadProviderFields(provider) {
+  const saved = byProvider[provider] || {};
+  modelEl.value = saved.model || '';
+  apiKeyEl.value = saved.apiKey || '';
+  baseUrlEl.value = saved.baseUrl || (LOCAL_PROVIDERS.has(provider) ? DEFAULT_BASE_URLS[provider] : '') || '';
+  updateFieldVisibility();
 }
 
 function hasCredentials() {
@@ -98,17 +111,15 @@ function scheduleFetch() {
 
 async function load() {
   const stored = await chrome.storage.local.get(STORAGE_KEY);
-  const config = stored[STORAGE_KEY] || {};
-  providerEl.value = config.provider || 'anthropic';
-  modelEl.value = config.model || '';
-  apiKeyEl.value = config.apiKey || '';
-  baseUrlEl.value = config.baseUrl || '';
-  updateFieldVisibility();
+  const root = stored[STORAGE_KEY] || {};
+  byProvider = root.byProvider || {};
+  providerEl.value = root.provider || 'anthropic';
+  loadProviderFields(providerEl.value);
   if (hasCredentials()) fetchModels({ silent: true });
 }
 
 providerEl.addEventListener('change', () => {
-  updateFieldVisibility();
+  loadProviderFields(providerEl.value);
   populateModelOptions([]);
   modelsStatusEl.textContent = '';
   if (hasCredentials()) fetchModels({ silent: true });
@@ -138,7 +149,8 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
-  await chrome.storage.local.set({ [STORAGE_KEY]: { provider, model, apiKey, baseUrl } });
+  byProvider = { ...byProvider, [provider]: { model, apiKey, baseUrl } };
+  await chrome.storage.local.set({ [STORAGE_KEY]: { provider, byProvider } });
   statusEl.classList.remove('error');
   statusEl.textContent = 'Saved.';
   setTimeout(() => { statusEl.textContent = ''; }, 2000);
