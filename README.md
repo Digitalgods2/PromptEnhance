@@ -190,6 +190,12 @@ more quantized model rather than waiting it out.
   Ollama's origin allowlist rejecting the extension (HTTP 403), not a real key
   problem — see [If Ollama rejects the extension's requests](#if-ollama-rejects-the-extensions-requests-403--invalid-api-key)
   above.
+- **Enhance button just says "Reload page":** the extension was reloaded/updated
+  (e.g. via `chrome://extensions`) after this tab was already open. A page that was
+  loaded before an update keeps talking to the old, now-disconnected extension
+  context — Chrome doesn't re-inject the new content script into already-open tabs
+  automatically. Refresh the tab (F5) and it'll work again; this only comes up right
+  after an update, not during normal day-to-day use.
 - **Something else looks broken:** on the extensions page, click the "service worker"
   link on the PromptEnhance card to open its console, and check the page's own
   DevTools console (F12) for content-script errors.
