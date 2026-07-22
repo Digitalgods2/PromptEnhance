@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PromptEnhance",
-  "version": "0.1.0",
+  "version": "1.0",
   "description": "Select text in any editable field, click Enhance, and get a stronger prompt back — powered by your own AI API key.",
   "icons": {
     "16": "icons/icon16.png",
